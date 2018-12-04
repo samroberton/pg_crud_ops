@@ -1,0 +1,18 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/pg_crud_ops
+    docker:
+      - image: sroberton/circleci-postgres-pgtap:0.0.5
+    steps:
+      - checkout
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Run tests
+          command: |
+            psql --host localhost --user postgres --file crud_ops.sql
+            psql --host localhost --user postgres --file tests/setup.sql
+            pg_prove --host localhost --user postgres tests/tests/*.sql
